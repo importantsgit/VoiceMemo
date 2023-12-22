@@ -20,7 +20,7 @@ struct VoiceRecorderView: View {
                 }
                 else {
                     VoiceRecorderListView(voiceRecorderViewModel: voiceRecorderViewModel)
-                        .padding(.top, 15 )
+                        .padding(.top, 15)
                 }
                 
                 Spacer()
@@ -39,15 +39,23 @@ struct VoiceRecorderView: View {
                 voiceRecorderViewModel.removeSelectedVoiceRecord()
             }
             
-            Button("취소", role: .cancel) {
-                voiceRecorderViewModel.removeSelectedVoiceRecord()
-            }
+            Button("취소", role: .cancel) { }
         }
         .alert(
             voiceRecorderViewModel.alertMessage,
             isPresented: $voiceRecorderViewModel.isDisplayAlert
         ) {
             Button("확인", role: .cancel) { }
+        }
+        .onAppear {
+            voiceRecorderViewModel.requestMicrophoneAccess { isAccess in
+                if isAccess {
+                    print("access")
+                }
+                else {
+                    print("access")
+                }
+            }
         }
     }
 }
@@ -110,7 +118,6 @@ private struct VoiceRecorderListView: View {
                         voiceRecorderViewModel: voiceRecorderViewModel,
                         recordedFile: recordedFile
                     )
-                    
                 }
             }
         }
@@ -132,7 +139,7 @@ private struct VoiceRecorderCellView: View {
             return 0
         }
     }
-    
+
     fileprivate init(
         voiceRecorderViewModel: VoiceRecorderViewModel,
         recordedFile: URL
@@ -141,7 +148,7 @@ private struct VoiceRecorderCellView: View {
         self.recordedFile = recordedFile
         (self.creationDate, self.duration) = voiceRecorderViewModel.getFileInfo(for: recordedFile)
     }
-    
+
     fileprivate var body: some View {
         VStack {
             Button {
@@ -153,22 +160,22 @@ private struct VoiceRecorderCellView: View {
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(Color.customBlack)
                     }
-                    
+
                     Spacer()
                 }
-                
+
                 Spacer()
                     .frame(height: 5)
-                
+
                 HStack {
                     if let creationDate = creationDate {
                         Text(creationDate.formattedVoiceRecorderTime)
                             .font(.system(size: 14))
                             .foregroundColor(Color.customIconGray)
                     }
-                    
+
                     Spacer()
-                    
+
                     if voiceRecorderViewModel.selectedRecordedFile != recordedFile,
                        let duration = duration {
                         Text(duration.formattedTimeInterval)
@@ -178,35 +185,35 @@ private struct VoiceRecorderCellView: View {
                 }
             }
             .padding(.horizontal, 20)
-            
+
             if voiceRecorderViewModel.selectedRecordedFile == recordedFile {
                 VStack {
                     progressBar(progress: progressBarValue)
                         .frame(height: 2)
-                    
+
                     Spacer()
                         .frame(height: 5)
-                    
+
                     HStack {
                         Text(voiceRecorderViewModel.playedTime.formattedTimeInterval)
                             .font(.system(size: 10, weight: .medium))
                             .foregroundColor(Color.customIconGray)
-                        
+
                         Spacer()
-                        
+
                         if let duration = duration {
                             Text(duration.formattedTimeInterval)
                                 .font(.system(size: 10, weight: .medium))
                                 .foregroundColor(.customIconGray)
                         }
                     }
-                    
+
                     Spacer()
                         .frame(height: 10)
-                    
+
                     HStack {
                         Spacer()
-                        
+
                         Button {
                             if voiceRecorderViewModel.isPaused {
                                 voiceRecorderViewModel.resumePlaying()
@@ -219,10 +226,10 @@ private struct VoiceRecorderCellView: View {
                                 .renderingMode(.template)
                                 .foregroundColor(.customBlack)
                         }
-                        
+
                         Spacer()
                             .frame(width: 10)
-                        
+
                         Button {
                             if voiceRecorderViewModel.isPlaying {
                                 voiceRecorderViewModel.pausePlaying()
@@ -232,9 +239,9 @@ private struct VoiceRecorderCellView: View {
                                 .renderingMode(.template)
                                 .foregroundColor(.customBlack)
                         }
-                        
+
                         Spacer()
-                        
+
                         Button {
                             voiceRecorderViewModel.removeBtnTapped()
                         } label: {
@@ -244,13 +251,13 @@ private struct VoiceRecorderCellView: View {
                                 .frame(width: 30, height: 30)
                                 .foregroundColor(.customBlack)
                         }
-                            
+
                     }
-                    
+
                 }
                 .padding(.horizontal, 20)
             }
-            
+
             Rectangle()
                 .fill(Color.customGray2)
                 .frame(height: 1)

@@ -32,6 +32,10 @@ class VoiceRecorderViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate 
     /// 현재 선택된 음성메모 파일
     @Published var selectedRecordedFile: URL?
     
+    // 폴더 파일 이름
+    private let directoryName = "VoiceMemo"
+    let fileManager = FileManager.default
+    
     init(
         isDisplayRemoveVoiceRecorderAlert: Bool = false,
         isDisplayAlert: Bool = false,
@@ -40,7 +44,6 @@ class VoiceRecorderViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate 
         isPlaying: Bool = false,
         isPaused: Bool = false,
         playedTime: TimeInterval = 0,
-        progressTimer: Timer? = nil,
         recordedFiles: [URL] = [],
         selectedRecordedFile: URL? = nil
     ){
@@ -51,9 +54,29 @@ class VoiceRecorderViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate 
         self.isPlaying = isPlaying
         self.isPaused = isPaused
         self.playedTime = playedTime
-        self.progressTimer = progressTimer
         self.recordedFiles = recordedFiles
         self.selectedRecordedFile = selectedRecordedFile
+    }
+    
+    func requestMicrophoneAccess(completion: @escaping (Bool) -> Void) {
+        let audioSession: AVAudioSession = AVAudioSession.sharedInstance()
+        switch audioSession.recordPermission {
+        case .undetermined: // 아직 녹음 권한 요청이 되지 않음, 사용자에게 권한 요청
+            audioSession.requestRecordPermission({ allowed in
+                completion(allowed)
+            })
+    
+        case .denied: // 사용자가 녹음 권한 거부, 사용자가 직접 설정 화면에서 권한 허용을 하게끔 유도
+            print("[Failure] Record Permission is Denied.")
+            completion(false)
+    
+        case .granted: // 사용자가 녹음 권한 허용
+            print("[Success] Record Permission is Granted.")
+            completion(true)
+   
+        @unknown default:
+            fatalError("[ERROR] Record Permission is Unknown Default.")
+        }
     }
 }
 
@@ -77,7 +100,7 @@ extension VoiceRecorderViewModel {
         }
 
         do {
-            try FileManager.default.removeItem(at: fileToRemove)
+            try fileManager.removeItem(at: fileToRemove)
             recordedFiles.remove(at: indexToRemove)
             selectedRecordedFile = nil
             
@@ -127,7 +150,19 @@ extension VoiceRecorderViewModel {
     }
     
     private func startRecording() {
-        let fileURL = getDocumentsDirectory().appendingPathComponent("새로운 녹음\(recordedFiles.count)")
+        
+        let directoryURL = getDocumentsDirectory().appending(path: "voiceMemo")
+        
+        if fileManager.fileExists(atPath: directoryURL.getFilePath()) == false {
+            do {
+                try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print("폴더를 생성하는 중 오류가 발생했습니다: \(error.localizedDescription)")
+            }
+        }
+        
+        let fileURL = directoryURL.appending(path: "새로운 녹음\(recordedFiles.count + 1)")//.appendingPathComponent("새로운 녹음\(recordedFiles.count + 1)")
+
         let settings = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
             AVSampleRateKey: 120000, // 샘플링 되는 비율
@@ -141,7 +176,6 @@ extension VoiceRecorderViewModel {
             self.isRecording = true
         }
         catch {
-            print("???")
             displayAlert(message: "음성 메모 녹음 중 오류가 발생했습니다.")
         }
     }
@@ -150,11 +184,12 @@ extension VoiceRecorderViewModel {
         if audioRecorder != nil {
             audioRecorder?.stop()
             self.recordedFiles.append(audioRecorder!.url)
+            self.isRecording = false
         }
     }
     
     private func getDocumentsDirectory() -> URL {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        let paths = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
         return paths[0]
     }
 }
@@ -206,16 +241,39 @@ extension VoiceRecorderViewModel {
     }
     
     func getFileInfo(for url: URL) -> (Date?, TimeInterval?) {
-        let fileManager = FileManager.default
+        let fileManager = fileManager
         var creationDate: Date?
         var duration: TimeInterval?
         
-        do {
-            let fileAttributes = try fileManager.attributesOfItem(atPath: url.path)
-            creationDate = fileAttributes[.creationDate] as? Date
-        }
-        catch {
-            displayAlert(message: "선택된 음성메모 파일의 재생 시간을 불러올 수 없습니다.")
+        DispatchQueue.main.async {[weak self] in
+            guard let self = self else { return }
+            var isEmptyURL = false
+            
+            do {
+                let fileAttributes = try fileManager.attributesOfItem(atPath: url.path)
+                creationDate = fileAttributes[.creationDate] as? Date
+            }
+            catch {
+                print(url)
+                displayAlert(message: "선택된 음성메모 파일 정보을 불러올 수 없습니다.")
+                if let index = self.recordedFiles.firstIndex(of: url) {
+                    //recordedFiles.remove(at: index)
+                    isEmptyURL = true
+                }
+            }
+            
+            if isEmptyURL == true { return }
+            
+            do {
+                let audioPlayer = try AVAudioPlayer(contentsOf: url)
+                duration = audioPlayer.duration
+            }
+            catch {
+                displayAlert(message: "선택된 음성메모 파일의 재생 시간을 불러올 수 없습니다.")
+                if let index = self.recordedFiles.firstIndex(of: url) {
+                    recordedFiles.remove(at: index)
+                }
+            }
         }
         
         return (creationDate, duration)
