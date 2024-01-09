@@ -26,6 +26,7 @@
 		7B204BE82B4CE68D00BEE17A /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B204BE72B4CE68D00BEE17A /* SettingView.swift */; };
 		7B204BEB2B4CF7EC00BEE17A /* Tab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B204BEA2B4CF7EC00BEE17A /* Tab.swift */; };
 		7B204BED2B4CF8A600BEE17A /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B204BEC2B4CF8A600BEE17A /* HomeViewModel.swift */; };
+		7B204BF02B4D123100BEE17A /* WriteBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B204BEF2B4D123100BEE17A /* WriteBtn.swift */; };
 		7B27EF322B157A3100555C5A /* Todo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B27EF312B157A3100555C5A /* Todo.swift */; };
 		7B27EF352B157ACF00555C5A /* TodoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B27EF342B157ACF00555C5A /* TodoView.swift */; };
 		7B27EF372B157AE500555C5A /* TodoListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B27EF362B157AE500555C5A /* TodoListView.swift */; };
@@ -69,6 +70,7 @@
 		7B204BE72B4CE68D00BEE17A /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 		7B204BEA2B4CF7EC00BEE17A /* Tab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tab.swift; sourceTree = "<group>"; };
 		7B204BEC2B4CF8A600BEE17A /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		7B204BEF2B4D123100BEE17A /* WriteBtn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriteBtn.swift; sourceTree = "<group>"; };
 		7B27EF312B157A3100555C5A /* Todo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Todo.swift; sourceTree = "<group>"; };
 		7B27EF342B157ACF00555C5A /* TodoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoView.swift; sourceTree = "<group>"; };
 		7B27EF362B157AE500555C5A /* TodoListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListView.swift; sourceTree = "<group>"; };
@@ -266,6 +268,7 @@
 		7B1BE00E2B0DC96B007F6CD0 /* CustomView */ = {
 			isa = PBXGroup;
 			children = (
+				7B204BEF2B4D123100BEE17A /* WriteBtn.swift */,
 			);
 			path = CustomView;
 			sourceTree = "<group>";
@@ -463,6 +466,7 @@
 				7B1BDFF42B0DC5E3007F6CD0 /* VoiceMemoApp.swift in Sources */,
 				7B204BEB2B4CF7EC00BEE17A /* Tab.swift in Sources */,
 				7B0E267F2B327F5600B7E66F /* MemoListViewModel.swift in Sources */,
+				7B204BF02B4D123100BEE17A /* WriteBtn.swift in Sources */,
 				7B0E267A2B327EB700B7E66F /* Memo.swift in Sources */,
 				7B0ED1C92B46628500D16ECC /* Int+Extensions.swift in Sources */,
 				7B27EF322B157A3100555C5A /* Todo.swift in Sources */,

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct VoiceRecorderView: View {
     @StateObject private var voiceRecorderViewModel = VoiceRecorderViewModel()
+    @EnvironmentObject private var homeViewModel: HomeViewModel
     
     var body: some View {
         ZStack {
@@ -46,6 +47,9 @@ struct VoiceRecorderView: View {
             isPresented: $voiceRecorderViewModel.isDisplayAlert
         ) {
             Button("확인", role: .cancel) { }
+        }
+        .onChange(of: voiceRecorderViewModel.recordedFiles) { recordedFiles in
+            homeViewModel.setVoiceRecoderCount(recordedFiles.count)
         }
         .onAppear {
             voiceRecorderViewModel.requestMicrophoneAccess { isAccess in
@@ -118,6 +122,9 @@ private struct VoiceRecorderListView: View {
                         voiceRecorderViewModel: voiceRecorderViewModel,
                         recordedFile: recordedFile
                     )
+                    .transaction { transaction in
+                        transaction.animation = nil
+                    }
                 }
             }
         }
@@ -174,10 +181,12 @@ private struct VoiceRecorderCellView: View {
                             .foregroundColor(Color.customIconGray)
                     }
 
-                    Spacer()
+                    
 
                     if voiceRecorderViewModel.selectedRecordedFile != recordedFile,
                        let duration = duration {
+                        Spacer()
+                        
                         Text(duration.formattedTimeInterval)
                             .font(.system(size: 14))
                             .foregroundColor(Color.customIconGray)
@@ -291,9 +300,14 @@ private struct progressBar: View {
 // MARK: - 녹음 버튼 뷰
 private struct RecordBtnView: View {
     @ObservedObject private var voiceRecorderViewModel: VoiceRecorderViewModel
+    @State private var isAnimation: Bool
     
-    fileprivate init(voiceRecorderViewModel: VoiceRecorderViewModel) {
+    fileprivate init(
+        voiceRecorderViewModel: VoiceRecorderViewModel,
+        isAnimation: Bool = false
+    ) {
         self.voiceRecorderViewModel = voiceRecorderViewModel
+        self.isAnimation = isAnimation
     }
     
     fileprivate var body: some View {
@@ -306,7 +320,21 @@ private struct RecordBtnView: View {
                 Button {
                     voiceRecorderViewModel.recordBtnTapped()
                 } label: {
-                    Image(voiceRecorderViewModel.isRecording ? "mic_recording" : "mic")
+                    if voiceRecorderViewModel.isRecording {
+                        Image("mic_recording")
+                            .scaleEffect(isAnimation ? 1.2 : 1)
+                            .onAppear {
+                                withAnimation(.spring().repeatForever()) {
+                                    isAnimation.toggle()
+                                }
+                            }
+                            .onDisappear {
+                                isAnimation = false
+                            }
+                    }
+                    else {
+                        Image("mic")
+                    }
                 }
             }
         }

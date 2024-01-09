@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SettingView: View {
+    @EnvironmentObject private var homeViewModel: HomeViewModel
     var body: some View {
         
         VStack {
@@ -45,21 +46,23 @@ private struct TitleView: View {
 
 // MARK: - 탭 카운트 뷰
 private struct TotalTapCountView: View {
+    @EnvironmentObject private var homeViewModel: HomeViewModel
+    
     fileprivate var body: some View {
         // 각각 탭 카운트 뷰 (todolist, 메모장, 음성메모)
         HStack {
             
-            TapCountView(title: "ToDo", count: 0)
+            TapCountView(title: "ToDo", count: homeViewModel.todosCount)
             
             Spacer()
                 .frame(width: 70)
             
-            TapCountView(title: "Memo", count: 0)
+            TapCountView(title: "Memo", count: homeViewModel.memosCount)
             
             Spacer()
                 .frame(width: 70)
             
-            TapCountView(title: "VoiceMemo", count: 0)
+            TapCountView(title: "VoiceMemo", count: homeViewModel.voiceRecoderCount)
             
         }
     }
@@ -93,6 +96,7 @@ private struct TapCountView: View {
 
 // MARK: - 전체 탭 이동 뷰
 private struct TotalTapMovieView: View {
+    @EnvironmentObject private var homeViewModel: HomeViewModel
     
     fileprivate var body: some View {
         VStack {
@@ -102,22 +106,30 @@ private struct TotalTapMovieView: View {
             
             TapMoveView(
                 title: "To Do List",
-                tapAction: {}
+                tapAction: {
+                    homeViewModel.changeSelectedTab(.todo)
+                }
             )
             
             TapMoveView(
                 title: "메모장",
-                tapAction: {}
+                tapAction: {
+                    homeViewModel.changeSelectedTab(.memo)
+                }
             )
             
             TapMoveView(
                 title: "음성메모",
-                tapAction: {}
+                tapAction: {
+                    homeViewModel.changeSelectedTab(.voiceRecoder)
+                }
             )
             
             TapMoveView(
                 title: "타이머",
-                tapAction: {}
+                tapAction: {
+                    homeViewModel.changeSelectedTab(.timer)
+                }
             )
             
             Rectangle()
@@ -163,5 +175,6 @@ private struct TapMoveView: View {
 struct SettingView_Previews: PreviewProvider {
     static var previews: some View {
         SettingView()
+            .environmentObject(HomeViewModel())
     }
 }
