@@ -152,7 +152,7 @@ extension VoiceRecorderViewModel {
     private func startRecording() {
         
         let directoryURL = getDocumentsDirectory().appending(path: "voiceMemo")
-        
+
         if fileManager.fileExists(atPath: directoryURL.getFilePath()) == false {
             do {
                 try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
@@ -162,10 +162,11 @@ extension VoiceRecorderViewModel {
         }
         
         let fileURL = directoryURL.appending(path: "새로운 녹음\(recordedFiles.count + 1)")//.appendingPathComponent("새로운 녹음\(recordedFiles.count + 1)")
+        print(fileURL)
 
         let settings = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 120000, // 샘플링 되는 비율
+            AVSampleRateKey: 12000, // 샘플링 되는 비율
             AVNumberOfChannelsKey: 1,
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
         ]
@@ -245,37 +246,32 @@ extension VoiceRecorderViewModel {
         var creationDate: Date?
         var duration: TimeInterval?
         
-        DispatchQueue.main.async {[weak self] in
-            guard let self = self else { return }
-            var isEmptyURL = false
-            
-            do {
-                let fileAttributes = try fileManager.attributesOfItem(atPath: url.path)
-                creationDate = fileAttributes[.creationDate] as? Date
-            }
-            catch {
-                print(url)
+        do {
+            let fileAttributes = try fileManager.attributesOfItem(atPath: url.path)
+            creationDate = fileAttributes[.creationDate] as? Date
+        }
+        catch {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else {return}
                 displayAlert(message: "선택된 음성메모 파일 정보을 불러올 수 없습니다.")
-                if let index = self.recordedFiles.firstIndex(of: url) {
-                    //recordedFiles.remove(at: index)
-                    isEmptyURL = true
-                }
-            }
-            
-            if isEmptyURL == true { return }
-            
-            do {
-                let audioPlayer = try AVAudioPlayer(contentsOf: url)
-                duration = audioPlayer.duration
-            }
-            catch {
-                displayAlert(message: "선택된 음성메모 파일의 재생 시간을 불러올 수 없습니다.")
-                if let index = self.recordedFiles.firstIndex(of: url) {
-                    recordedFiles.remove(at: index)
-                }
             }
         }
         
+        do {
+            let audioPlayer = try AVAudioPlayer(contentsOf: url)
+            duration = audioPlayer.duration
+        }
+        catch {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else {return}
+                displayAlert(message: "선택된 음성메모 파일의 재생 시간을 불러올 수 없습니다.")
+            }
+            if let index = recordedFiles.firstIndex(of: url) {
+                recordedFiles.remove(at: index)
+            }
+        }
+        
+        print("creationDate: \(creationDate), duration: \(duration)")
         return (creationDate, duration)
     }
     

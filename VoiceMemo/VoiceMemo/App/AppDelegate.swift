@@ -5,22 +5,16 @@
 //  Created by 이재훈 on 2023/11/22.
 //
 
-import SwiftUI
+import UIKit
 
-struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
-        }
-        .padding()
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+class AppDelegate: NSObject, UIApplicationDelegate {
+    var notificationDelegate = NotificationDelegate()
+    
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool
+    {
+        UNUserNotificationCenter.current().delegate = notificationDelegate
+        return true
     }
 }
